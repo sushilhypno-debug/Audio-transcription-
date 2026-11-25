@@ -16,9 +16,34 @@ const UNCOMPRESSED_TYPES = new Set([
   'audio/x-flac',
 ]);
 
+const EXT_TO_MIME: Record<string, string> = {
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  wave: 'audio/wav',
+  m4a: 'audio/mp4',
+  aac: 'audio/aac',
+  ogg: 'audio/ogg',
+  opus: 'audio/opus',
+  webm: 'audio/webm',
+  flac: 'audio/flac',
+  wma: 'audio/x-ms-wma',
+};
+
 const UNCOMPRESSED_EXT_REGEX = /\.(wav|wave|aiff|aif|flac|pcm)$/i;
 const OPTIMIZE_SIZE_THRESHOLD_BYTES = 1.5 * 1024 * 1024; // 1.5 MB
 const TARGET_SAMPLE_RATE = 16000;
+
+export function resolveAudioMimeType(file: File): string {
+  const rawType = (file.type || '').split(';')[0].trim().toLowerCase();
+  if (rawType && rawType.startsWith('audio/')) {
+    return rawType;
+  }
+  const extMatch = file.name.toLowerCase().match(/\.([a-z0-9]+)$/);
+  if (extMatch && EXT_TO_MIME[extMatch[1]]) {
+    return EXT_TO_MIME[extMatch[1]];
+  }
+  return rawType || 'audio/mpeg';
+}
 
 function encodeMonoWav16Bit(samples: Float32Array, sampleRate: number): Blob {
   const buffer = new ArrayBuffer(44 + samples.length * 2);
@@ -57,7 +82,7 @@ function encodeMonoWav16Bit(samples: Float32Array, sampleRate: number): Blob {
 export async function optimizeAudioForTranscription(
   file: File
 ): Promise<{ blob: Blob; mimeType: string }> {
-  const originalMime = file.type || 'audio/mpeg';
+  const originalMime = resolveAudioMimeType(file);
   const isUncompressed =
     UNCOMPRESSED_TYPES.has(originalMime.toLowerCase()) ||
     UNCOMPRESSED_EXT_REGEX.test(file.name);
@@ -70,7 +95,8 @@ export async function optimizeAudioForTranscription(
   // Only attempt Web Audio downsampling in browser environments with OfflineAudioContext
   if (
     typeof window === 'undefined' ||
-    (!window.AudioContext && !(window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext) ||
+    (!window.AudioContext &&
+      !(window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext) ||
     typeof OfflineAudioContext === 'undefined'
   ) {
     return { blob: file, mimeType: originalMime };

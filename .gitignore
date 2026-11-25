@@ -7,10 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies & Build Output
 node_modules
 dist
 dist-ssr
+
+# Environment & Local Secret Files
+.env
+.env.*
+!.env.example
 *.local
+*.pem
+*.key
+
+# Private AI Studio Export / Prompt History
+migrated_prompt_history/
 
 # Editor directories and files
 .vscode/*

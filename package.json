@@ -1,5 +1,5 @@
 {
-  "name": "miraclesmastery-b-roll-pro",
+  "name": "audio-transcription",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,7 +14,6 @@
     "@google/genai": "^1.38.0",
     "@types/express": "^5.0.6",
     "express": "^5.3.0",
-    "jszip": "^3.10.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tsx": "^4.23.15"

@@ -36,10 +36,12 @@ export class GeminiService {
     });
 
     if (!response.ok) {
-      let errMsg = 'Failed to transcribe audio';
+      let errMsg = 'Unable to transcribe audio right now. Please try again.';
       try {
         const errData = await response.json();
-        errMsg = errData.error || errMsg;
+        if (errData?.error && typeof errData.error === 'string') {
+          errMsg = errData.error;
+        }
       } catch {
         // Ignore parse error
       }
@@ -79,7 +81,7 @@ export class GeminiService {
         } else if (payload.type === 'done' && payload.result) {
           finalResult = payload.result;
         } else if (payload.type === 'error') {
-          throw new Error(payload.error || 'Failed to transcribe audio');
+          throw new Error(payload.error || 'Unable to transcribe audio right now. Please try again.');
         }
       }
     }
@@ -93,27 +95,6 @@ export class GeminiService {
     }
 
     throw new Error('No transcription text returned');
-  }
-
-  async transcribeAudio(
-    base64Audio: string,
-    mimeType: string,
-    includeTimestamps: boolean = false
-  ): Promise<TranscriptionResult> {
-    const response = await fetch('/api/transcribe-audio', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ base64Audio, mimeType, includeTimestamps }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'No transcription text returned');
-    }
-
-    return data;
   }
 }
 

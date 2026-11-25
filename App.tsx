@@ -4,6 +4,27 @@ import { geminiService } from './services/geminiService';
 import { AudioPlayerBar } from './components/AudioPlayerBar';
 
 const SUPPORTED_AUDIO_REGEX = /\.(mp3|wav|wave|m4a|aac|ogg|webm|flac|wma|opus)$/i;
+const MAX_AUDIO_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+
+const ALLOWED_CLIENT_MIME_TYPES = new Set([
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/wave',
+  'audio/x-wav',
+  'audio/vnd.wave',
+  'audio/mp4',
+  'audio/m4a',
+  'audio/x-m4a',
+  'audio/aac',
+  'audio/aacp',
+  'audio/ogg',
+  'audio/opus',
+  'audio/webm',
+  'audio/flac',
+  'audio/x-flac',
+  'audio/x-ms-wma',
+]);
 
 function parseTimeToSeconds(timeStr: string): number {
   const clean = String(timeStr || '00:00').trim().replace(',', '.');
@@ -148,10 +169,30 @@ const App: React.FC = () => {
 
   const handleAudioChange = (file: File) => {
     if (!file) return;
-    if (!file.type.startsWith('audio/') && !SUPPORTED_AUDIO_REGEX.test(file.name)) {
-      setTranscribeError('Please select a valid audio file (MP3, WAV, M4A, AAC, OGG, WEBM, or FLAC).');
+    const normalizedMime = (file.type || '').split(';')[0].trim().toLowerCase();
+    const isAllowedMime = normalizedMime ? ALLOWED_CLIENT_MIME_TYPES.has(normalizedMime) : false;
+    const isAllowedExt = SUPPORTED_AUDIO_REGEX.test(file.name);
+
+    if (
+      !isAllowedMime &&
+      !((normalizedMime === '' || normalizedMime === 'application/octet-stream') && isAllowedExt)
+    ) {
+      setTranscribeError(
+        'Unsupported file format. Please select an audio file (MP3, WAV, M4A, AAC, OGG, OPUS, WEBM, FLAC, or WMA).'
+      );
       return;
     }
+
+    if (file.size === 0) {
+      setTranscribeError('The selected audio file is empty.');
+      return;
+    }
+
+    if (file.size > MAX_AUDIO_FILE_SIZE_BYTES) {
+      setTranscribeError('Audio file exceeds the 20 MB maximum upload limit.');
+      return;
+    }
+
     if (audioPreviewUrl) {
       URL.revokeObjectURL(audioPreviewUrl);
     }
@@ -484,7 +525,7 @@ const App: React.FC = () => {
                         Drop audio file here or browse
                       </p>
                       <p className="text-xs text-slate-400">
-                        Supports MP3, WAV, M4A, AAC, OGG, WEBM, FLAC
+                        Supports MP3, WAV, M4A, AAC, OGG, OPUS, WEBM, FLAC, WMA · Max 20 MB
                       </p>
                     </div>
                   </div>
