@@ -1,0 +1,17 @@
+{
+  "name": "Miraclesmastery Audio Transcript",
+  "short_name": "MM Transcript",
+  "description": "Fast AI-powered audio transcription studio with live streaming, synchronized timestamps, and SRT subtitle export.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3221/3221803.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

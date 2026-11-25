@@ -1,0 +1,8 @@
+{
+  "name": "Miraclesmastery marathi transcript",
+  "description": "Fast AI-powered audio transcription studio with live streaming, synchronized timestamps, and SRT subtitle export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
